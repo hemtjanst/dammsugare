@@ -63,6 +63,8 @@ func main() {
 		m.Publish("announce", []byte(robot.Topic), 1, false)
 	})
 
+	log.Print("Announced RoboVac to Hemtjänst")
+
 	robot.OnSet("on", func(msg messaging.Message) {
 		if string(msg.Payload()) == "1" {
 			m.Publish("remote/robovac/KEY_AUTO", []byte("200"), 1, false)
@@ -71,9 +73,11 @@ func main() {
 				<-time.After(time.Duration(*timeout) * time.Minute)
 				robot.Update("on", "0")
 			}()
+			log.Print("Turned on robot")
 		} else {
 			m.Publish("remote/robovac/KEY_HOME", []byte("5000"), 1, false)
 			robot.Update("on", "0")
+			log.Print("Turned off robot")
 		}
 	})
 
