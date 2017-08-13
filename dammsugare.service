@@ -1,0 +1,9 @@
+[Unit]
+Description=Dammsugare - robot vacuum to Hemtjänst
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/local/bin/dammsugare
+
+[Install]
+WantedBy=multi-user.target
