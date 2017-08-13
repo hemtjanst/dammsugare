@@ -1,7 +1,7 @@
 # Dammsugare
 
-Dammsugare exposes a switch to HomeKit that allows turning a Eufy RoboVac 11 on
-or off.
+Dammsugare exposes a switch to HomeKit that allows turning a robot vacuum
+on or off. By default it is configured for a Eufy RoboVac 11.
 
 **Note**: This relies on a soon to be open sourced component that exposes an
 [LIRCd](http://www.lirc.org/html/lircd.html) to MQTT. Each topic it exposes is
@@ -12,7 +12,8 @@ IR remote that can be used to control any device within range.
 ## Installation
 
 The installation is pretty simple, `go install` it and run it. Potentially
-adjust the timeout.
+adjust the timeout and set a different manufacturer, name, model and serial
+number.
 
 ```
 go install github.com/hemtjanst/dammsugare

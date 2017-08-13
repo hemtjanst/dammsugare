@@ -14,7 +14,15 @@ import (
 )
 
 var (
-	timeout = flag.Int("timeout", 120, "Minutes after which we think the robot is done")
+	timeout      = flag.Int("timeout", 120, "Minutes after which we think the robot is done")
+	startTopic   = flag.String("start.topic", "remote/robovac/KEY_AUTO", "LIRCd topic to start the vacuum")
+	startPress   = flag.String("start.press", "200", "Milliseconds to hold down the start button")
+	stopTopic    = flag.String("stop.topic", "remote/robovac/KEY_HOME", "LIRCd topic to stop the vacuum")
+	stopPress    = flag.String("stop.press", "5000", "Milliseconds to hold down the stop button")
+	manufacturer = flag.String("robot.manufacturer", "Eufy", "Vacuum manufacturer")
+	name         = flag.String("robot.name", "RoboVac", "Vacuum name")
+	model        = flag.String("robot.model", "11", "Vacuum model")
+	serial       = flag.String("robot.serial-number", "undefined", "Vacuum serial number")
 )
 
 func main() {
@@ -49,9 +57,10 @@ func main() {
 	m := messaging.NewMQTTMessenger(c)
 
 	robot := device.NewDevice("robot/vacuum", m)
-	robot.Manufacturer = "Eufy"
-	robot.Name = "RoboVac"
-	robot.Model = "11"
+	robot.Manufacturer = *manufacturer
+	robot.Name = *name
+	robot.Model = *model
+	robot.SerialNumber = *serial
 	robot.Type = "switch"
 	robot.LastWillID = id
 	robot.Features = map[string]*device.Feature{
@@ -63,11 +72,11 @@ func main() {
 		m.Publish("announce", []byte(robot.Topic), 1, false)
 	})
 
-	log.Print("Announced RoboVac to Hemtjänst")
+	log.Printf("Announced %s to Hemtjänst", *name)
 
 	robot.OnSet("on", func(msg messaging.Message) {
 		if string(msg.Payload()) == "1" {
-			m.Publish("remote/robovac/KEY_AUTO", []byte("200"), 1, false)
+			m.Publish(*startTopic, []byte(*startPress), 1, false)
 			robot.Update("on", "1")
 			go func() {
 				<-time.After(time.Duration(*timeout) * time.Minute)
@@ -76,7 +85,7 @@ func main() {
 			}()
 			log.Print("Turned on robot")
 		} else {
-			m.Publish("remote/robovac/KEY_HOME", []byte("5000"), 1, false)
+			m.Publish(*stopTopic, []byte(*stopPress), 1, false)
 			robot.Update("on", "0")
 			log.Print("Turned off robot")
 		}
