@@ -72,6 +72,7 @@ func main() {
 			go func() {
 				<-time.After(time.Duration(*timeout) * time.Minute)
 				robot.Update("on", "0")
+				log.Print("Timeout expired, setting switch to off")
 			}()
 			log.Print("Turned on robot")
 		} else {
