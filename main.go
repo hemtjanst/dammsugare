@@ -63,30 +63,28 @@ func main() {
 	robot.SerialNumber = *serial
 	robot.Type = "switch"
 	robot.LastWillID = id
-	robot.Features = map[string]*device.Feature{
-		"on": {},
-	}
+	robot.AddFeature("on", &device.Feature{})
 
-	robot.PublishMeta()
 	m.Subscribe("discover", 1, func(msg messaging.Message) {
-		m.Publish("announce", []byte(robot.Topic), 1, false)
+		robot.PublishMeta()
 	})
 
 	log.Printf("Announced %s to Hemtjänst", *name)
 
-	robot.OnSet("on", func(msg messaging.Message) {
+	on, _ := robot.GetFeature("on")
+	on.OnSet(func(msg messaging.Message) {
 		if string(msg.Payload()) == "1" {
 			m.Publish(*startTopic, []byte(*startPress), 1, false)
-			robot.Update("on", "1")
+			on.Update("1")
 			go func() {
 				<-time.After(time.Duration(*timeout) * time.Minute)
-				robot.Update("on", "0")
+				on.Update("0")
 				log.Print("Timeout expired, setting switch to off")
 			}()
 			log.Print("Turned on robot")
 		} else {
 			m.Publish(*stopTopic, []byte(*stopPress), 1, false)
-			robot.Update("on", "0")
+			on.Update("0")
 			log.Print("Turned off robot")
 		}
 	})
