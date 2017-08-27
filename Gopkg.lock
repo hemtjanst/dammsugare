@@ -11,7 +11,7 @@
   branch = "master"
   name = "github.com/hemtjanst/hemtjanst"
   packages = ["device","messaging","messaging/flagmqtt"]
-  revision = "48abf33494e7cf90ffaa58fb3c71376805dee427"
+  revision = "2054fc1d6b34ef788aa23f1968936f1480e60ff3"
 
 [[projects]]
   name = "github.com/satori/go.uuid"
@@ -23,7 +23,7 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = ["proxy","websocket"]
-  revision = "1c05540f6879653db88113bc4a2b70aec4bd491f"
+  revision = "57efc9c3d9f91fb3277f8da1cff370539c4d3dc5"
 
 [solve-meta]
   analyzer-name = "dep"
