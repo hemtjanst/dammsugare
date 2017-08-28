@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	mq "github.com/eclipse/paho.mqtt.golang"
 	"github.com/hemtjanst/hemtjanst/device"
 	"github.com/hemtjanst/hemtjanst/messaging"
 	"github.com/hemtjanst/hemtjanst/messaging/flagmqtt"
@@ -25,6 +26,10 @@ var (
 	serial       = flag.String("robot.serial-number", "undefined", "Vacuum serial number")
 )
 
+type handler struct {
+	devices []*device.Device
+}
+
 func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n\n", os.Args[0])
@@ -38,20 +43,20 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	id := flagmqtt.NewUniqueIdentifier()
+	h := &handler{
+		devices: []*device.Device{},
+	}
 	conf := flagmqtt.ClientConfig{
-		ClientID:    "dammsugare",
-		WillTopic:   "leave",
-		WillPayload: id,
-		WillRetain:  false,
-		WillQoS:     0,
+		ClientID:         "dammsugare",
+		WillTopic:        "leave",
+		WillPayload:      id,
+		WillRetain:       false,
+		WillQoS:          0,
+		OnConnectHandler: h.onConnectHandler,
 	}
 	c, err := flagmqtt.NewPersistentMqtt(conf)
 	if err != nil {
 		log.Fatal("Could not configure the MQTT client: ", err)
-	}
-
-	if token := c.Connect(); token.Wait() && token.Error() != nil {
-		log.Fatal("Failed to establish connection with broker: ", token.Error())
 	}
 
 	m := messaging.NewMQTTMessenger(c)
@@ -65,11 +70,7 @@ func main() {
 	robot.LastWillID = id
 	robot.AddFeature("on", &device.Feature{})
 
-	m.Subscribe("discover", 1, func(msg messaging.Message) {
-		robot.PublishMeta()
-	})
-
-	log.Printf("Announced %s to Hemtjänst", *name)
+	h.devices = append(h.devices, robot)
 
 	on, _ := robot.GetFeature("on")
 	on.OnSet(func(msg messaging.Message) {
@@ -89,6 +90,10 @@ func main() {
 		}
 	})
 
+	if token := c.Connect(); token.Wait() && token.Error() != nil {
+		log.Fatal("Failed to establish connection with broker: ", token.Error())
+	}
+
 loop:
 	for {
 		select {
@@ -101,4 +106,15 @@ loop:
 	c.Disconnect(250)
 	log.Print("Disconnected from broker. Bye!")
 	os.Exit(0)
+}
+
+func (h *handler) onConnectHandler(c mq.Client) {
+	log.Print("Connected to MQTT broker")
+	c.Subscribe("discover", 1, func(mq.Client, mq.Message) {
+		log.Printf("Got discover, publishing announce")
+		for _, d := range h.devices {
+			d.PublishMeta()
+			log.Print("Published meta for ", d.Topic)
+		}
+	})
 }
