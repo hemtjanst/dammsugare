@@ -2,16 +2,16 @@
 
 
 [[projects]]
+  branch = "master"
   name = "github.com/eclipse/paho.mqtt.golang"
   packages = [".","packets"]
-  revision = "aff15770515e3c57fc6109da73d42b0d46f7f483"
-  version = "v1.1.0"
+  revision = "720ed1a92c623623f00233e4bcd8d513d6e2fbe7"
 
 [[projects]]
   branch = "master"
   name = "github.com/hemtjanst/hemtjanst"
   packages = ["device","messaging","messaging/flagmqtt"]
-  revision = "2054fc1d6b34ef788aa23f1968936f1480e60ff3"
+  revision = "242d1a706c197680777f1adabab4598b79305e09"
 
 [[projects]]
   name = "github.com/satori/go.uuid"
@@ -28,6 +28,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5985cb75a6a7efd14bb9f8b05ce41ff6366073e4970017b1df00349677f311f6"
+  inputs-digest = "a20d0a276e0367b1bacde7a26431360837e7fe0ee855521ce285a0d993b4284e"
   solver-name = "gps-cdcl"
   solver-version = 1
