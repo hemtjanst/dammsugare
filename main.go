@@ -72,36 +72,12 @@ func main() {
 
 	h.devices = append(h.devices, robot)
 
-	on, _ := robot.GetFeature("on")
-	on.OnSet(func(msg messaging.Message) {
-		if string(msg.Payload()) == "1" {
-			m.Publish(*startTopic, []byte(*startPress), 1, false)
-			on.Update("1")
-			go func() {
-				<-time.After(time.Duration(*timeout) * time.Minute)
-				on.Update("0")
-				log.Print("Timeout expired, setting switch to off")
-			}()
-			log.Print("Turned on robot")
-		} else {
-			m.Publish(*stopTopic, []byte(*stopPress), 1, false)
-			on.Update("0")
-			log.Print("Turned off robot")
-		}
-	})
-
 	if token := c.Connect(); token.Wait() && token.Error() != nil {
 		log.Fatal("Failed to establish connection with broker: ", token.Error())
 	}
 
-loop:
-	for {
-		select {
-		case sig := <-quit:
-			log.Printf("Received signal: %s, proceeding to shutdown", sig)
-			break loop
-		}
-	}
+	sig := <-quit
+	log.Printf("Received signal: %s, proceeding to shutdown", sig)
 
 	c.Disconnect(250)
 	log.Print("Disconnected from broker. Bye!")
@@ -115,6 +91,23 @@ func (h *handler) onConnectHandler(c mq.Client) {
 		for _, d := range h.devices {
 			d.PublishMeta()
 			log.Print("Published meta for ", d.Topic)
+			on, _ := d.GetFeature("on")
+			on.OnSet(func(msg messaging.Message) {
+				if string(msg.Payload()) == "1" {
+					c.Publish(*startTopic, 1, false, []byte(*startPress))
+					on.Update("1")
+					log.Print("Turned on robot")
+					go func() {
+						<-time.After(time.Duration(*timeout) * time.Minute)
+						on.Update("0")
+						log.Print("Timeout expired, setting switch to off")
+					}()
+				} else {
+					c.Publish(*stopTopic, 1, false, []byte(*stopPress))
+					on.Update("0")
+					log.Print("Turned off robot")
+				}
+			})
 		}
 	})
 }
