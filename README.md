@@ -3,7 +3,7 @@
 Dammsugare exposes a switch to HomeKit that allows turning a robot vacuum
 on or off. By default it is configured for a Eufy RoboVac 11.
 
-**Note**: This relies on [mqtt2lirc][lirc]. The RoboVac is fairly dumb, it
+**Note**: This relies on [rodljus][lirc]. The RoboVac is fairly dumb, it
 doesn't have WiFi or other cloud-y API things to control it with. So instead
 it is controlled by sending the necessary commands to mqtt2lirc.
 
@@ -26,4 +26,4 @@ cycle is and set the appropriate `-timeout`, in minutes.
 
 See the `--help` for all possible options.
 
-[lirc]: https://github.com/hemtjanst/mqtt2lirc
+[lirc]: https://github.com/hemtjanst/rodljus
