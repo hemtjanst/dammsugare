@@ -3,31 +3,41 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/eclipse/paho.mqtt.golang"
-  packages = [".","packets"]
-  revision = "720ed1a92c623623f00233e4bcd8d513d6e2fbe7"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/hemtjanst/hemtjanst"
-  packages = ["device","messaging","messaging/flagmqtt"]
-  revision = "242d1a706c197680777f1adabab4598b79305e09"
-
-[[projects]]
-  name = "github.com/satori/go.uuid"
+  digest = "1:cb11dd1f39fde997ea0a311d8049cb2fca583f558fd146232d127576f62bf2d1"
+  name = "github.com/goiiot/libmqtt"
   packages = ["."]
-  revision = "879c5887cd475cd7864858769793b2ceb0d44feb"
-  version = "v1.1.0"
+  pruneopts = ""
+  revision = "883b6d0f24731b69fe69daecc94cc7076a69dc70"
 
 [[projects]]
-  branch = "master"
-  name = "golang.org/x/net"
-  packages = ["proxy","websocket"]
-  revision = "57efc9c3d9f91fb3277f8da1cff370539c4d3dc5"
+  digest = "1:c1d7e883c50a26ea34019320d8ae40fad86c9e5d56e63a1ba2cb618cef43e986"
+  name = "github.com/google/uuid"
+  packages = ["."]
+  pruneopts = ""
+  revision = "064e2069ce9c359c118179501254f67d7d37ba24"
+  version = "0.2"
+
+[[projects]]
+  digest = "1:6090e1c7a5bd005475d10dcb237d7cdd3899b589a8cccd718494cd89ff77278a"
+  name = "github.com/hemtjanst/bibliotek"
+  packages = [
+    "client",
+    "device",
+    "feature",
+    "transport/mqtt",
+  ]
+  pruneopts = ""
+  revision = "39b8e2cef601eee01eb1fa4b11ab6b7591866c7b"
+  version = "v0.1.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a20d0a276e0367b1bacde7a26431360837e7fe0ee855521ce285a0d993b4284e"
+  input-imports = [
+    "github.com/hemtjanst/bibliotek/client",
+    "github.com/hemtjanst/bibliotek/device",
+    "github.com/hemtjanst/bibliotek/feature",
+    "github.com/hemtjanst/bibliotek/transport/mqtt",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

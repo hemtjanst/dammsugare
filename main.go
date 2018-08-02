@@ -1,17 +1,19 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
-	mq "github.com/eclipse/paho.mqtt.golang"
-	"github.com/hemtjanst/hemtjanst/device"
-	"github.com/hemtjanst/hemtjanst/messaging"
-	"github.com/hemtjanst/hemtjanst/messaging/flagmqtt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/hemtjanst/bibliotek/client"
+	"github.com/hemtjanst/bibliotek/device"
+	"github.com/hemtjanst/bibliotek/feature"
+	"github.com/hemtjanst/bibliotek/transport/mqtt"
 )
 
 var (
@@ -37,77 +39,67 @@ func main() {
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\n")
 	}
+	mcfg := mqtt.MustFlags(flag.String, flag.Bool)
 	flag.Parse()
 
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	id := flagmqtt.NewUniqueIdentifier()
-	h := &handler{
-		devices: []*device.Device{},
-	}
-	conf := flagmqtt.ClientConfig{
-		ClientID:         "dammsugare",
-		WillTopic:        "leave",
-		WillPayload:      id,
-		WillRetain:       false,
-		WillQoS:          0,
-		OnConnectHandler: h.onConnectHandler,
-	}
-	c, err := flagmqtt.NewPersistentMqtt(conf)
+	ctx, cancel := context.WithCancel(context.Background())
+	m, err := mqtt.New(ctx, mcfg())
 	if err != nil {
-		log.Fatal("Could not configure the MQTT client: ", err)
+		panic(err)
 	}
 
-	m := messaging.NewMQTTMessenger(c)
+	robot, _ := client.NewDevice(&device.Info{
+		Topic:        "robot/vacuum",
+		Name:         *name,
+		Model:        *model,
+		Type:         "switch",
+		Manufacturer: *manufacturer,
+		SerialNumber: *serial,
+		Features: map[string]*feature.Info{
+			"on": &feature.Info{}},
+	}, m)
 
-	robot := device.NewDevice("robot/vacuum", m)
-	robot.Manufacturer = *manufacturer
-	robot.Name = *name
-	robot.Model = *model
-	robot.SerialNumber = *serial
-	robot.Type = "switch"
-	robot.LastWillID = id
-	robot.AddFeature("on", &device.Feature{})
+	ft := robot.Feature("on")
+	on, _ := ft.OnSet()
+	var t *time.Timer
 
-	h.devices = append(h.devices, robot)
-
-	if token := c.Connect(); token.Wait() && token.Error() != nil {
-		log.Fatal("Failed to establish connection with broker: ", token.Error())
-	}
-
-	sig := <-quit
-	log.Printf("Received signal: %s, proceeding to shutdown", sig)
-
-	c.Disconnect(250)
-	log.Print("Disconnected from broker. Bye!")
-	os.Exit(0)
-}
-
-func (h *handler) onConnectHandler(c mq.Client) {
-	log.Print("Connected to MQTT broker")
-	c.Subscribe("discover", 1, func(mq.Client, mq.Message) {
-		log.Printf("Got discover, publishing announce")
-		for _, d := range h.devices {
-			d.PublishMeta()
-			log.Print("Published meta for ", d.Topic)
-			on, _ := d.GetFeature("on")
-			on.OnSet(func(msg messaging.Message) {
-				if string(msg.Payload()) == "1" {
-					c.Publish(*startTopic, 1, false, []byte(*startPress))
-					on.Update("1")
-					log.Print("Turned on robot")
-					go func() {
-						<-time.After(time.Duration(*timeout) * time.Minute)
-						on.Update("0")
-						log.Print("Timeout expired, setting switch to off")
-					}()
-				} else {
-					c.Publish(*stopTopic, 1, false, []byte(*stopPress))
-					on.Update("0")
-					log.Print("Turned off robot")
+loop:
+	for {
+		select {
+		case sig := <-quit:
+			log.Printf("Received signal: %s, proceeding to shutdown", sig)
+			break loop
+		// Publish after every interval has elapsed
+		case msg, open := <-on:
+			if !open {
+				break loop
+			}
+			switch msg {
+			case "1":
+				if t != nil {
+					t.Stop()
 				}
-			})
+				m.Publish(*startTopic, []byte(*startPress), false)
+				ft.Update("1")
+				log.Print("Turned on robot")
+				t = time.AfterFunc(time.Duration(*timeout)*time.Minute,
+					func() {
+						ft.Update("0")
+						log.Print("Timeout expired, setting switch to off")
+					})
+			default:
+				if t != nil {
+					t.Stop()
+				}
+				m.Publish(*stopTopic, []byte(*stopPress), false)
+				ft.Update("0")
+				log.Print("Turned off robot")
+			}
 		}
-	})
+	}
+	cancel()
+	os.Exit(0)
 }
