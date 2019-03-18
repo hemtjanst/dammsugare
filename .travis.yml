@@ -1,0 +1,21 @@
+language: go
+sudo: false
+notifications:
+  email: false
+go:
+  - 1.11.x
+  - 1.12.x
+  - master
+matrix:
+  fast_finish: true
+  allow_failures:
+    - go: master
+env:
+  - GO111MODULE=on
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $GOPATH/pkg/mod
+before_install: go mod download
+install: go build ./...
+script: go test -race -v $(go list ./...)
