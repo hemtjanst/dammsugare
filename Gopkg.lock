@@ -3,41 +3,30 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:cb11dd1f39fde997ea0a311d8049cb2fca583f558fd146232d127576f62bf2d1"
   name = "github.com/goiiot/libmqtt"
   packages = ["."]
-  pruneopts = ""
-  revision = "883b6d0f24731b69fe69daecc94cc7076a69dc70"
+  revision = "6fed8272b13b92a33fa2985d01843b22aa5e32de"
 
 [[projects]]
-  digest = "1:c1d7e883c50a26ea34019320d8ae40fad86c9e5d56e63a1ba2cb618cef43e986"
   name = "github.com/google/uuid"
   packages = ["."]
-  pruneopts = ""
-  revision = "064e2069ce9c359c118179501254f67d7d37ba24"
-  version = "0.2"
+  revision = "0cd6bf5da1e1c83f8b45653022c74f71af0538a4"
+  version = "v1.1.1"
 
 [[projects]]
-  digest = "1:6090e1c7a5bd005475d10dcb237d7cdd3899b589a8cccd718494cd89ff77278a"
   name = "github.com/hemtjanst/bibliotek"
   packages = [
     "client",
     "device",
     "feature",
-    "transport/mqtt",
+    "transport/mqtt"
   ]
-  pruneopts = ""
-  revision = "39b8e2cef601eee01eb1fa4b11ab6b7591866c7b"
-  version = "v0.1.0"
+  revision = "72407fa5fb387bea397f2d0d295bb2f7a6089077"
+  version = "v0.2.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/hemtjanst/bibliotek/client",
-    "github.com/hemtjanst/bibliotek/device",
-    "github.com/hemtjanst/bibliotek/feature",
-    "github.com/hemtjanst/bibliotek/transport/mqtt",
-  ]
+  inputs-digest = "cb06824f82934dbfffcab280e6f193c0d20a3a0a6d5ed08a39748837970d139e"
   solver-name = "gps-cdcl"
   solver-version = 1
