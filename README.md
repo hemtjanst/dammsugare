@@ -18,8 +18,6 @@ go install github.com/hemtjanst/dammsugare
 dammsugare -timeout 100 -mqtt.address broker.mydomain.tld:1883
 ```
 
-Please note that using go install will grab the latest version of all the dependencies which can cause problems. As such a `Gopkg.toml` and associated lock file is provided to be used with dep ensure. After that you can `go build -o dammsugare main.go`.
-
 ## Configuration
 
 Because the robot cannot signal back to us when it's done the timeout is used
